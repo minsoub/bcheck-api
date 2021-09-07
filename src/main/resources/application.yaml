@@ -11,18 +11,18 @@ logging:
 # OpenAPI - Naver
 openapi:
   naver:
-    clientID: 8LHwtR6GWztI7XY6_zt1
-    clientSecret: qJ8C9_odvW
+    clientID: xxxx
+    clientSecret: xxxxx
     url: https://openapi.naver.com/v1/search/book_adv
 # AEC
 inf:
   hist:
     aes-key: b3edr6ce00eadc3a
-    endpoint: http://mas.hist.co.kr/Pds/PdsWorktime.do
+    endpoint: http://xxxx
 
 # SSO
 sso:
-  hist-url: https://sso.hist.co.kr
+  hist-url: https://xxxxx
 
 # micrometer prometheus
 management:
@@ -64,11 +64,11 @@ spring:
     activate:
       on-profile: local
   mongo:
-    user: bcheckuser
-    password: bcheckuseradmin123
+    user: xxxx
+    password: xxxxx
     port: 27017
     host: bcheck-docdb.cluster-cfe0kcb9osrg.ap-northeast-2.docdb.amazonaws.com
-    database: bcheckDB
+    database: xxxx
 # open api
 springdoc:
   api-docs:
@@ -85,11 +85,11 @@ spring:
     activate:
       on-profile: dev
   mongo:
-    user: bcheckuser
-    password: bcheckuseradmin123
+    user: xxxx
+    password: xxxxx
     port: 27017
     host: bcheck-docdb.cluster-cfe0kcb9osrg.ap-northeast-2.docdb.amazonaws.com
-    database: bcheckDB
+    database: xxxx
 # open api
 springdoc:
   api-docs:
@@ -108,11 +108,11 @@ spring:
   pid:
     file: bcheck.pid
   mongo:
-    user: bcheckuser
-    password: bcheckuseradmin123
+    user: xxxx
+    password: xxxxx
     port: 27017
     host: bcheck-docdb.cluster-cfe0kcb9osrg.ap-northeast-2.docdb.amazonaws.com
-    database: bcheckDB
+    database: xxxx
 # open api
 springdoc:
   api-docs:
