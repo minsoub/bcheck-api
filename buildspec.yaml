@@ -1,0 +1,55 @@
+version: 0.2
+
+env:
+  variables:
+    SPRING_PROFILE: "dev"
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      - echo Logging in to Amazon EKS...
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin/kubectl
+      - mkdir ~/.kube
+      - aws eks --region ap-northeast-2 update-kubeconfig --name bcheck-eks-cluster  --role-arn arn:aws:iam::160270626841:role/bcheck-EksCodeBuildKubectlRole
+      - aws sts get-caller-identity
+      - kubectl get svc -n bcheck-ns
+      - kubectl get po -n bcheck-ns
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 160270626841.dkr.ecr.ap-northeast-2.amazonaws.com
+      - REPOSITORY_URI=160270626841.dkr.ecr.ap-northeast-2.amazonaws.com/bcheck-api
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+  build:
+    commands:
+      - chmod +x ./gradlew
+      - echo unit testing ...
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILE} ./gradlew test
+      - echo make jar ...
+      - ./gradlew assemble
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - docker build -f Dockerfile -t $REPOSITORY_URI:latest --build-arg JAR_FILE=build/libs/bcheck-api-0.0.1-SNAPSHOT.jar .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - DATE=`date`
+      - echo Build completed on $DATE
+      - AWS_ECR_URI=$REPOSITORY_URI:$IMAGE_TAG
+      - sed -i.bak 's#AWS_ECR_URI#'"$AWS_ECR_URI"'#' ./bcheck-api-deployment.yaml
+      - cat ./bcheck-api-deployment.yaml
+      - kubectl apply -f ./bcheck-api-deployment.yaml
+#      - kubectl apply -f ./k8s/icheck-nlb.yaml
+cache:
+  paths:
+    - '/root/.gradle/**/*'
